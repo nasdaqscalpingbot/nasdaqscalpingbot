@@ -17,4 +17,4 @@ Any commercial use, distribution, modification, or reproduction of this software
 
 This software is provided "as is" without warranty of any kind. The author is not responsible for any damages or consequences resulting from the use of this software.
 
-For licensing inquiries, contact [your email or contact information].
+For licensing inquiries, contact nasdaqscalpingbot@gmail.com.
