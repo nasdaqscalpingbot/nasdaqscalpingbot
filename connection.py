@@ -1,19 +1,19 @@
 import http.client
 import json
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 import time as sleep_time
-from data.csv_data import update_errorlog
+from ai_logging import update_errorlog
 
 
-USERNAME = "username"
-PASSWORD = "password"
+USERNAME = "************************"
+PASSWORD = "************************"
 
 
 # ========== Globals =======
 BASE_URL = "api-capital.backend-capital.com"  # Replace with the actual API endpoint
 DEMO_BASE_URL = "demo-api-capital.backend-capital.com"  # Replace with the actual API endpoint
 EXTENDED_URL = "/api/v1/"
-API_KEY = "api-key"  # Replace with your actual API key
+API_KEY = "**********************"  # Replace with your actual API key
 CST_TOKEN = ""
 X_SECURITY_TOKEN = ""
 
@@ -31,7 +31,6 @@ def create_new_session():
     }
     conn.request("POST", f"{EXTENDED_URL}session", payload, headers)
     res = conn.getresponse()
-
     # Fetch the tokens
     X_SECURITY_TOKEN = res.getheader('X-SECURITY-TOKEN')
     CST_TOKEN = res.getheader('CST')

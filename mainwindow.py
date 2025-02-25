@@ -15,7 +15,7 @@ window.geometry('1024x800')
 window.config(bg ='whitesmoke')
 
 #Title
-title_label = tk.Label(window, text='Nasdaq scalping bot 2.0a', font=("Helvetica", 24), bg='whitesmoke', fg='black')
+title_label = tk.Label(window, text='Nasdaq scalping bot 2.2.0', font=("Helvetica", 24), bg='whitesmoke', fg='black')
 title_label.pack(pady=(50, 10))  # Adds 50 pixels above and 10 pixels below
 
 #start button
@@ -92,14 +92,14 @@ oldest_candle_open_label.grid(row=4, column=1, sticky='w')
 placeholder_oldest_candle_open = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
 placeholder_oldest_candle_open.grid(row=4, column=2, sticky='we')
 
-# Current ema, when available
-macd_label = tk.Label(frame, text='Current macd_line:', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
+# Current macd, when available
+macd_label = tk.Label(frame, text='MACD (Buy > Signal):', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
 macd_label.grid(row=5, column=1, sticky='w')
 placeholder_macd = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
 placeholder_macd.grid(row=5, column=2, sticky='we')
 
 # current signal_line
-signal_line_label = tk.Label(frame, text='Current signal line:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
+signal_line_label = tk.Label(frame, text='Signal line (Sell > MACD):', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
 signal_line_label.grid(row=6, column=1, sticky='w')
 placeholder_signal_line = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
 placeholder_signal_line.grid(row=6, column=2, sticky='we')
@@ -116,6 +116,12 @@ advice_label = tk.Label(frame, text='Current advice:', font=(font_family, font_s
 advice_label.grid(row=8, column=1, sticky='w')
 placeholder_advice = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
 placeholder_advice.grid(row=8, column=2, sticky='we')
+
+# Current market condition
+market_label = tk.Label(frame, text='Market condition:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
+market_label.grid(row=9, column=1, sticky='w')
+placeholder_market = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
+placeholder_market.grid(row=9, column=2, sticky='we')
 
 # ------------------- Columns right, contract information ----------------------------------------------------------
 
@@ -138,13 +144,13 @@ placeholder_current_profit = tk.Label(frame, text='', font=(font_family, font_si
 placeholder_current_profit.grid(row=3, column=5, sticky='we')
 
 # Take profit
-take_profit_label = tk.Label(frame, text='Take profit:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
-take_profit_label.grid(row=4, column=4, sticky='w')
-placeholder_take_profit = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
-placeholder_take_profit.grid(row=4, column=5, sticky='we')
+# take_profit_label = tk.Label(frame, text='Take profit:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
+# take_profit_label.grid(row=4, column=4, sticky='w')
+# placeholder_take_profit = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
+# placeholder_take_profit.grid(row=4, column=5, sticky='we')
 
 # Stop loss
-stop_loss_label = tk.Label(frame, text='Stop loss:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
+stop_loss_label = tk.Label(frame, text='Trailing stop loss:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
 stop_loss_label.grid(row=5, column=4, sticky='w')
 placeholder_stop_loss = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
 placeholder_stop_loss.grid(row=5, column=5, sticky='we')
@@ -156,11 +162,11 @@ positive_PL_label.grid(row=6, column=4, sticky='w')
 placeholder_positive_PL = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
 placeholder_positive_PL.grid(row=6, column=5, sticky='we')
 
-# Negative profit counter
-negative_PL_label = tk.Label(frame, text='Negative P/L counter:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
-negative_PL_label.grid(row=7, column=4, sticky='w')
-placeholder_negative_PL = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
-placeholder_negative_PL.grid(row=7, column=5, sticky='we')
+# # Negative profit counter
+# negative_PL_label = tk.Label(frame, text='Negative P/L counter:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
+# negative_PL_label.grid(row=7, column=4, sticky='w')
+# placeholder_negative_PL = tk.Label(frame, text='', font=(font_family, font_size), fg= widgetforeground, bg= placeholderbackground)
+# placeholder_negative_PL.grid(row=7, column=5, sticky='we')
 
 # Stat date time
 starttime_label = tk.Label(frame, text='Started at:', font=(font_family, font_size), fg= widgetforeground, bg= widgetbackground)
@@ -175,21 +181,21 @@ placeholder_total_profit = tk.Label(frame, text='', font=(font_family, font_size
 placeholder_total_profit.grid(row=9, column=5, sticky='we')
 
 
-def update_screen(S_SESSION):
+def update_screen(lst_fetched_candles, macd, signal, advice, start_balance, start_datetime, int_number_of_candles, market_condition, direction, flo_contract_size, int_stop_loss_distance, int_this_contract_profit, int_positive_counter):
     window_bg = 'whitesmoke'
     labels_bg = "whitesmoke"
     widget_bg = 'whitesmoke'
     widget_fg = 'black'
     now = datetime.now()  # Get the current date and time
     str_current_datetime = now.strftime("%d-%m-%Y %H:%M:%S")  # Format as DD-MM-YYYY HH:MM:SS
-    #S_SESSION.str_given_advice = "BUY"
+    # direction = "BUY"
     # Set default colors based on the condition
-    if S_SESSION.str_current_contract == "BUY":
+    if direction == "BUY":
         window_bg = '#33ff33'
         labels_bg = "#33ff33"
         widget_bg = 'whitesmoke'
         widget_fg = 'black'
-    elif S_SESSION.str_current_contract == "SELL":
+    elif direction == "SELL":
         window_bg = '#ff8566'
         labels_bg = "#ff8566"
         widget_bg = 'whitesmoke'
@@ -199,29 +205,31 @@ def update_screen(S_SESSION):
     frame.configure(bg=window_bg)
 
     account_information = account_details()
-    S_SESSION.flo_current_balance = round(account_information['accounts'][0]['balance']['balance'], 2)
-    total_profit = S_SESSION.flo_current_balance - S_SESSION.flo_start_balance
+    flo_current_balance = round(account_information['accounts'][0]['balance']['balance'], 2)
+    total_profit = flo_current_balance - start_balance
+    histogram = macd - signal
 
     # Update text and the colors in placeholders
     # Define a dictionary to store labels and corresponding placeholder updates
     label_placeholder_pairs = {
         "time": (timeupdate_label, placeholder_time, str_current_datetime),
-        "int_candles": (number_of_candles_label, placeholder_candles, S_SESSION.int_number_of_candles),
-        "int_current_candle_open": (current_candle_open_label, placeholder_current_candle_open, S_SESSION.lis_fetched_candles[0][0]),
-        "int_previous_candle_open": (previous_candle_open_label, placeholder_previous_candle_open, S_SESSION.lis_fetched_candles[1][0]),
-        "int_oldest_candle_open": (oldest_candle_open_label, placeholder_oldest_candle_open, S_SESSION.lis_fetched_candles[2][0]),
-        "macd_line": (macd_label, placeholder_macd, S_SESSION.flo_macd_line),
-        "signal_line": (signal_line_label, placeholder_signal_line, S_SESSION.flo_signal_line),
-        "histogram": (histogram_label, placeholder_histogram, S_SESSION.flo_histogram),
-        "str_current_contract": ( current_contract_label, placeholder_current_contract, S_SESSION.str_current_contract),
-        "str_advice": (advice_label, placeholder_advice, S_SESSION.str_given_advice),
-        "flo_contract_size": (contract_size_label, placeholder_contract_size, S_SESSION.flo_basic_contract_size),
-        "int_take_profit": (take_profit_label, placeholder_take_profit, "$" + str(S_SESSION.int_contract_take_profit)),
-        "int_stop_loss": (stop_loss_label, placeholder_stop_loss,"$" + str(S_SESSION.int_contract_stop_loss)),
-        "int_current_profit": (current_profit_label, placeholder_current_profit, "€" + str(S_SESSION.int_this_contract_profit)),
-        "positive_PL": (positive_PL_label, placeholder_positive_PL,str(S_SESSION.int_positive_counter)+"/15"),
-        "negative_PL": (negative_PL_label, placeholder_negative_PL, str(S_SESSION.int_negative_counter) + "/9"),
-        "starttime": (starttime_label, placeholder_starttime, S_SESSION.str_start_datetime),
+        "int_candles": (number_of_candles_label, placeholder_candles, int_number_of_candles),
+        "int_current_candle_open": (current_candle_open_label, placeholder_current_candle_open, lst_fetched_candles[0][0]),
+        "int_previous_candle_open": (previous_candle_open_label, placeholder_previous_candle_open, lst_fetched_candles[1][0]),
+        "int_oldest_candle_open": (oldest_candle_open_label, placeholder_oldest_candle_open, lst_fetched_candles[2][0]),
+        "macd_line": (macd_label, placeholder_macd, macd),
+        "signal_line": (signal_line_label, placeholder_signal_line, signal),
+        "histogram": (histogram_label, placeholder_histogram, histogram),
+        "str_current_contract": ( current_contract_label, placeholder_current_contract, direction),
+        "str_advice": (advice_label, placeholder_advice, advice),
+        "str_market": (market_label, placeholder_market, market_condition),
+        "flo_contract_size": (contract_size_label, placeholder_contract_size, flo_contract_size),
+        #"int_take_profit": (take_profit_label, placeholder_take_profit, "$" + str(S_SESSION.int_contract_take_profit)),
+        "int_stop_loss": (stop_loss_label, placeholder_stop_loss, int_stop_loss_distance ),
+        "int_current_profit": (current_profit_label, placeholder_current_profit, "€" + str(int_this_contract_profit)),
+        "positive_PL": (positive_PL_label, placeholder_positive_PL,str(int_positive_counter)+"/20"),
+        #"negative_PL": (negative_PL_label, placeholder_negative_PL, str(S_SESSION.int_negative_counter) + "/9"),
+        "starttime": (starttime_label, placeholder_starttime, start_datetime),
         "int_total_profit": (total_profit_label, placeholder_total_profit, "€" + str(round(total_profit,2)))
     }
 
