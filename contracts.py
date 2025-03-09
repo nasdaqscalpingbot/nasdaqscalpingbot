@@ -11,22 +11,24 @@ def calculate_position_sizes(flo_pre_contract_balance):
     # int_contract_stop_loss = round(S_SESSION.flo_pre_contract_balance * 0.01, 0)                              # Stop loss size, 1% of the saldo
     return flo_basic_contract_size
 
-def calculate_trailing_stop_loss(lst_fetched_candles: list[list[float]], multiplier: int = 25, min_stop_loss: int = 20) -> float:
+def calculate_trailing_stop_loss(lst_fetched_candles: list[list[float]], multiplier: int = 3, min_stop_loss: int = 20) -> float:
     """
-    Calculate stop-loss distance based on recent open-close differences.
+    Calculate stop-loss distance based on recent open price differences.
     """
     recent_candles = lst_fetched_candles[:10]
-    open_close_differences = [abs(candle[0] - candle[1]) for candle in recent_candles]
+
+    # Calculate absolute differences between consecutive open prices
+    open_differences = [abs(recent_candles[i][0] - recent_candles[i + 1][0]) for i in range(len(recent_candles) - 1)]
+
     # Calculate the average difference
-    avg_diff = sum(open_close_differences) / len(open_close_differences) if open_close_differences else 0
+    avg_diff = sum(open_differences) / len(open_differences) if open_differences else 0
+
     # Scale the stop-loss and ensure it's above the minimum
-    print("avg_diff", avg_diff)
-    stop_loss_distance = avg_diff * multiplier
-    if stop_loss_distance > min_stop_loss:
-        int_stop_loss_distance = stop_loss_distance
-    else:
-        int_stop_loss_distance = min_stop_loss
-    print(f"Calculated Stop-Loss Distance: {int_stop_loss_distance}")
+    stop_loss_distance = round(avg_diff * multiplier, 0)
+    # int_stop_loss_distance = max(stop_loss_distance, min_stop_loss)
+    int_stop_loss_distance = 10
+    print("stop loss distance", int_stop_loss_distance)
+
     return int_stop_loss_distance
 
 

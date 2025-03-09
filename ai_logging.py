@@ -40,9 +40,7 @@ def append_contract_to_csv(contract_id):
         # Write headers if file doesn't exist
         if not file_exists:
             writer.writerow(['Contract ID', 'Timestamp', 'Balance',
-                             'Current candle open', 'Current candle close',
-                             'Previous candle open', 'Previous candle close',
-                             'Oldest candle open', 'Oldest candle close',
+                             'Current candle open','Previous candle open', 'Oldest candle open',
                              'MACD line', 'Signal_line', 'Status', 'Buy/Sell'])
         # Append the contract data to the CSV
         contract_data = contract_cache[contract_id]
@@ -51,11 +49,8 @@ def append_contract_to_csv(contract_id):
             contract_data['Timestamp'],
             contract_data['Balance'],
             contract_data['Current_candle_open'],
-            contract_data['Current_candle_close'],
             contract_data['Previous_candle_open'],
-            contract_data['Previous_candle_close'],
             contract_data['Oldest_candle_open'],
-            contract_data['Oldest_candle_close'],
             contract_data['MACD_line'],
             contract_data['Signal_line'],
             contract_data['Status'],
@@ -79,7 +74,7 @@ def update_csv_contract(contract_id):
         headers = next(reader)  # Save headers
         for row in reader:
             if row[0] == contract_id:  # Update the row with the matching contract ID
-                row[21] = contract_cache[contract_id]['Status']  # Update Status
+                row[8] = contract_cache[contract_id]['Status']  # Update Status
             rows.append(row)
 
     # Rewrite the CSV with updated data

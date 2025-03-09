@@ -5,15 +5,15 @@ import time as sleep_time
 from ai_logging import update_errorlog
 
 
-USERNAME = "************************"
-PASSWORD = "************************"
+USERNAME = "***************************"
+PASSWORD = "***************************"
 
 
 # ========== Globals =======
 BASE_URL = "api-capital.backend-capital.com"  # Replace with the actual API endpoint
 DEMO_BASE_URL = "demo-api-capital.backend-capital.com"  # Replace with the actual API endpoint
 EXTENDED_URL = "/api/v1/"
-API_KEY = "**********************"  # Replace with your actual API key
+API_KEY = "*************************"  # Replace with your actual API key
 CST_TOKEN = ""
 X_SECURITY_TOKEN = ""
 
@@ -91,16 +91,7 @@ def fetch_us100_snapshot():
 
 def fetch_us100_history():
     now = datetime.now()  # Get the current date and time
-    start_datetime = "2024-12-11T12:00:00"
-    end_datetime = "2024-12-11T13:00:00"
-    print(f"Dynamic Query: {EXTENDED_URL}prices/US100?resolution=MINUTE&max=50&from={start_datetime}&to={end_datetime}")
-
-    # Format the request dynamically
-    dict_us100_history = make_request(
-        "GET",
-        f"{EXTENDED_URL}prices/US100?resolution=MINUTE&max=50&from={start_datetime}&to={end_datetime}"
-    )
-    # dict_us100_history = make_request("GET",f"{EXTENDED_URL}prices/US100?resolution=MINUTE&max=50&from=2024-10-15T12:00:00&to=2024-10-15T15:00:00")
+    dict_us100_history = make_request("GET",f"{EXTENDED_URL}prices/US100?resolution=MINUTE&max=1000&from=2025-03-04T10:00:00&to=2025-03-04T22:00:00")
     return dict_us100_history
 
 def account_details():

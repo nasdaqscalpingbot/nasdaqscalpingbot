@@ -207,7 +207,7 @@ def update_screen(lst_fetched_candles, macd, signal, advice, start_balance, star
     account_information = account_details()
     flo_current_balance = round(account_information['accounts'][0]['balance']['balance'], 2)
     total_profit = flo_current_balance - start_balance
-    histogram = macd - signal
+    histogram = round(macd - signal, 2)
 
     # Update text and the colors in placeholders
     # Define a dictionary to store labels and corresponding placeholder updates
@@ -227,7 +227,7 @@ def update_screen(lst_fetched_candles, macd, signal, advice, start_balance, star
         #"int_take_profit": (take_profit_label, placeholder_take_profit, "$" + str(S_SESSION.int_contract_take_profit)),
         "int_stop_loss": (stop_loss_label, placeholder_stop_loss, int_stop_loss_distance ),
         "int_current_profit": (current_profit_label, placeholder_current_profit, "€" + str(int_this_contract_profit)),
-        "positive_PL": (positive_PL_label, placeholder_positive_PL,str(int_positive_counter)+"/20"),
+        "positive_PL": (positive_PL_label, placeholder_positive_PL, str(int_positive_counter)+"/7"),
         #"negative_PL": (negative_PL_label, placeholder_negative_PL, str(S_SESSION.int_negative_counter) + "/9"),
         "starttime": (starttime_label, placeholder_starttime, start_datetime),
         "int_total_profit": (total_profit_label, placeholder_total_profit, "€" + str(round(total_profit,2)))

@@ -1,11 +1,17 @@
 import market
+import numpy as np
 
 
 def macd_check(lst_fetched_candles):
-    macd, signal = market.calculate_macd_values(lst_fetched_candles)
-    if macd > (signal + 2):
+    macd, signal, macd_history = market.calculate_macd_values(lst_fetched_candles)
+    if macd_history < 10:
+        threshold = 2
+    else:
+        threshold = np.std(macd_history[-10]) * 1.5
+
+    if macd > (signal + threshold):
         return "BUY", macd, signal
-    elif macd < (signal - 2):
+    elif macd < (signal - threshold):
         return "SELL", macd, signal
     else:
         return "HOLD", macd, signal
@@ -15,9 +21,9 @@ def three_candle_movement(lst_fetched_candles):
     previous_candle_open = lst_fetched_candles[1][0]
     oldest_candle_open = lst_fetched_candles[2][0]
     three_candle_advice = "HOLD"
-    if current_candle_open > (previous_candle_open + 3) and previous_candle_open > (oldest_candle_open + 3):
+    if current_candle_open > (previous_candle_open + 5) and previous_candle_open > (oldest_candle_open + 5):
         three_candle_advice = "BUY"
-    elif current_candle_open < (previous_candle_open - 3) and previous_candle_open < (oldest_candle_open - 3):
+    elif current_candle_open < (previous_candle_open - 5) and previous_candle_open < (oldest_candle_open - 5):
         three_candle_advice = "SELL"
     return three_candle_advice
 

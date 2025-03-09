@@ -11,30 +11,23 @@ from PyQt5.QtCore import Qt
 class MACDArea(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setStyleSheet("background-color: #141104; border: 3px solid black;")
-        self.setFixedSize(1000, 200)
+        self.setStyleSheet("background-color: #1E1E1E; border: 3px solid black;")
+        self.setFixedSize(980, 200)
 
-        self.candle_data = [
-            ["2024-11-19T04:15:44", 13.8, 10.4, 3.4],
-            ["2024-11-19T04:10:44", 13.5, 10.2, -3.3],
-            ["2024-11-19T04:05:44", 13.2, 10.0, -3.2],
-            ["2024-11-19T04:00:44", 0.0, 0.0, 0.0],
-            ["2024-11-19T03:55:44", 15.2, 12.4, -2.8],
-            ["2024-11-19T03:50:44", 15.0, 12.4, 2.6],
-        ]
+        self.candle_data = [["00:00:01", 0.1, 0.1],]
+        self.start_time = self.candle_data[0][0]
 
         self.candle_data.reverse()  # Reverse to make the oldest first
 
-        # Determine the Y-axis scale from the candle data
+        # Determine Y-axis scale from the candle data
         self.macd_line_max = max(candle[1] for candle in self.candle_data)  # Highest MACD-line
         self.macd_line_min = min(candle[1] for candle in self.candle_data)  # Lowest MACD-line
         self.signal_line_max = max(candle[2] for candle in self.candle_data)  # Highest signal-line
         self.signal_line_min = min(candle[2] for candle in self.candle_data)  # Lowest signal-line
-        self.histogram_max = max(candle[3] for candle in self.candle_data)  # Highest histogram
-        self.histogram_min = min(candle[3] for candle in self.candle_data)  # Lowest histogram
 
-        # Determine the start time from the first candle
-        self.start_time = datetime.datetime.fromisoformat(self.candle_data[0][0])
+        # Calculate histogram dynamically
+        self.histogram_max = max(candle[1] - candle[2] for candle in self.candle_data)  # MACD - Signal
+        self.histogram_min = min(candle[1] - candle[2] for candle in self.candle_data)  # MACD - Signal
 
         # Use the widest range for consistency
         self.y_axis_min = min(self.macd_line_min, self.signal_line_min, self.histogram_min)
@@ -84,14 +77,16 @@ class MACDArea(QLabel):
         painter.drawLine(0, y_center, self.width(), y_center)
 
         # X-axis (time)
-        current_time = self.start_time
+        current_time = datetime.datetime.strptime(self.start_time, "%H:%M:%S")  # ✅ Convert to datetime
         for index, x in enumerate(range(10, self.width(), self.grid_spacing_x)):
             painter.drawLine(x, 0, x, self.height())  # Vertical line
+
             # Only draw time labels for every other line
             if index % 2 == 0:
-                time_label = current_time.strftime("%H:%M")
+                time_label = current_time.strftime("%H:%M")  # ✅ Convert back to string
                 painter.drawText(x + 5, self.height() - 5, time_label)  # Label slightly above the bottom
-            current_time += datetime.timedelta(minutes=5)  # Increment by 5 minutes
+
+            current_time += datetime.timedelta(minutes=5)  # ✅ Now this works!
 
     def draw_macd_values(self, painter: object) -> object:
         step_x = self.grid_spacing_x  # Horizontal spacing
@@ -109,7 +104,8 @@ class MACDArea(QLabel):
         bar_width = int(step_x * 0.6)
 
         for i, candle in enumerate(self.candle_data):
-            time, macd_value, signal_value, histogram_value = candle
+            time, macd_value, signal_value = candle  # Only unpack the available values
+            histogram_value = macd_value - signal_value  # Calculate Histogram dynamically
             x = self.grid_spacing_x + step_x * i  # Compute X-coordinate
 
             if histogram_value >= 0:
@@ -167,3 +163,42 @@ class MACDArea(QLabel):
         painter.setPen(QPen(QColor(200, 50, 50), 2))  # Red for Signal line
         for j in range(1, len(signal_points)):
             painter.drawLine(signal_points[j - 1][0], signal_points[j - 1][1], signal_points[j][0], signal_points[j][1])
+
+    def update_macd(self, new_macd_values):
+        if len(new_macd_values) == 3:
+            self.candle_data.append(new_macd_values)  # Add to the list
+
+            # Ignore first 32 candles (MACD isn't valid before this)
+            if len(self.candle_data) < 35:
+                return  # Wait until enough data is collected
+
+            # Ensure we keep only the last 30 MACD values **after** we have at least 32
+            self.candle_data = self.candle_data[-30:]
+
+            # Extract valid MACD and signal values
+            valid_macd_values = self.candle_data  # Now we know it has 30 valid entries
+
+            # Determine Y-axis scale from valid MACD data
+            self.macd_line_max = max(candle[1] for candle in valid_macd_values)
+            self.macd_line_min = min(candle[1] for candle in valid_macd_values)
+            self.signal_line_max = max(candle[2] for candle in valid_macd_values)
+            self.signal_line_min = min(candle[2] for candle in valid_macd_values)
+
+            # Calculate histogram dynamically
+            self.histogram_max = max(candle[1] - candle[2] for candle in valid_macd_values)
+            self.histogram_min = min(candle[1] - candle[2] for candle in valid_macd_values)
+
+            # Determine the start time from the first valid MACD candle
+            self.start_time = valid_macd_values[0][0]
+
+            latest_candle = self.candle_data[-1]  # Get the most recent MACD candle
+            latest_macd = latest_candle[1]
+            latest_signal = latest_candle[2]
+            latest_histogram = latest_macd - latest_signal  # Calculate histogram last
+
+            # Set Y-axis range using the widest values
+            self.y_axis_min = min(candle[4] for candle in valid_macd_values) - 10
+            self.y_axis_max = max(candle[3] for candle in valid_macd_values) + 10
+
+            # Determine horizontal grid spacing
+            self.grid_spacing_x = int(self.width() / 35)  # 35 divisions

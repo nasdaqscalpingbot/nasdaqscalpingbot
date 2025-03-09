@@ -11,17 +11,13 @@ from PyQt5.QtCore import Qt
 class ProgressBarArea(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setStyleSheet("background-color: #141104; border: 3px solid black;")
+        self.setStyleSheet("background-color: #1E1E1E; border: 3px solid black;")
         self.setFixedSize(80, 700)
+        self.current_value = 0
 
-        # S_SESSION.int_positive_counter = 0
-        # S_SESSION.int_negative_counter = 5
-
-        #  Demo to try out
-        int_positive_counter = 0
-        int_negative_counter = 7
-        self.current_positive_value = int_positive_counter
-        self.current_nagative_value = int_negative_counter
+    def update_bar(self, new_value):
+        self.current_value = new_value
+        self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -33,51 +29,54 @@ class ProgressBarArea(QLabel):
     def draw_grid(self, painter):
         # Set up pen for grid lines
         pen = QPen(QColor("whitesmoke"))
-        pen.setWidth(2)
+        pen.setWidth(1)
         painter.setPen(pen)
 
-        # Grid lines for positive, zero, and negative
-        height = self.height()
-        y_center = height // 2
+        total_steps = 7  # From 0 to 7
+        step_height = int(self.height() / total_steps)
 
-        # Draw center (zero) line
-        painter.drawLine(0, y_center, self.width(), y_center)
+        # --- Fixed positions for 0 and 7 ---
+        y_pos_0 = 695
+        y_pos_1 = 620
+        y_pos_2 = 520
+        y_pos_3 = 420
+        y_pos_4 = 320
+        y_pos_5 = 220
+        y_pos_6 = 120
+        y_pos_7 = 20
 
-        # Add labels
-        painter.drawText(5, 20, "Positive")  # Top label
-        painter.drawText(5, y_center - 5, "0")  # Center label
-        painter.drawText(5, height - 10, "Negative")  # Bottom label
+        painter.drawText(5, y_pos_0, "0")  # Fixed bottom position
+        painter.drawText(5, y_pos_1, "1")  # Fixed bottom position
+        painter.drawLine(25, y_pos_1, self.width(), y_pos_1)  # Draw horizontal line
+        painter.drawText(5, y_pos_2, "2")  # Fixed bottom position
+        painter.drawLine(25, y_pos_2, self.width(), y_pos_2)  # Draw horizontal line
+        painter.drawText(5, y_pos_3, "3")  # Fixed bottom position
+        painter.drawLine(25, y_pos_3, self.width(), y_pos_3)  # Draw horizontal line
+        painter.drawText(5, y_pos_4, "4")  # Fixed bottom position
+        painter.drawLine(25, y_pos_4, self.width(), y_pos_4)  # Draw horizontal line
+        painter.drawText(5, y_pos_5, "5")  # Fixed bottom position
+        painter.drawLine(25, y_pos_5, self.width(), y_pos_5)  # Draw horizontal line
+        painter.drawText(5, y_pos_6, "6")  # Fixed bottom position
+        painter.drawLine(25, y_pos_6, self.width(), y_pos_6)  # Draw horizontal line
+        painter.drawText(5, y_pos_7, "7")  # Fixed top position
+        painter.drawLine(25, y_pos_7, self.width(), y_pos_7)  # Draw horizontal line
 
 
     def draw_bar(self, painter):
-        total_steps = 10  # Scale range from 0 to 9
-        height = self.height() // 2  # Half-height for up/down bar
-        stepHeight = int(height/total_steps)
-        centerLine = total_steps * stepHeight
+        total_steps = 7  # Maximum range (0 to 7)
+        stepHeight = int(self.height() / total_steps)  # Divide widget height into 7 equal steps
 
-        # Draw positive bar if value > 0
-        if self.current_positive_value > 0:
-            bar_height = self.current_positive_value * stepHeight
+        # Ensure valid bar height
+        bar_height = (self.current_value * stepHeight) - 25
 
-            # Create a linear gradient
-            gradient = QLinearGradient(0, centerLine - bar_height, 0, centerLine)
-            gradient.setColorAt(0.0, QColor("#26eb4a"))  # Start color
-            gradient.setColorAt(1.0, QColor("#044710"))  # End color
+        # Create a linear gradient (bottom to top)
+        gradient = QLinearGradient(0, self.height() - bar_height, 0, self.height())
+        gradient.setColorAt(0.0, QColor("#26eb4a"))  # Start color (bottom)
+        gradient.setColorAt(1.0, QColor("#044710"))  # End color (top)
 
-            # Set the brush to the gradient
-            painter.setBrush(gradient)
-            painter.setPen(Qt.NoPen)
+        # Set the brush to the gradient
+        painter.setBrush(gradient)
+        painter.setPen(Qt.NoPen)
 
-            # Draw the positive bar
-            painter.drawRect(25, centerLine - bar_height, 30, bar_height)
-        else:
-            bar_height = (self.current_nagative_value * stepHeight)
-            # Create a linear gradient
-            gradient = QLinearGradient(0, centerLine, 0, centerLine + bar_height)
-            gradient.setColorAt(1.0, QColor("#fc5353"))  # Start color
-            gradient.setColorAt(0.0, QColor("#4f0616"))  # End color
-
-            # Set the brush to the gradient
-            painter.setBrush(gradient)
-            painter.setPen(Qt.NoPen)
-            painter.drawRect(25, centerLine, 30, bar_height)
+        # Draw the bar from the bottom up
+        painter.drawRect(25, (self.height()-5) - bar_height, 30, bar_height)
