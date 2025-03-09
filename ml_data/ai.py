@@ -2,122 +2,96 @@ import csv
 import os
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.utils import to_categorical
+import tensorflow.keras.backend as K
+import tensorflow as tf
+
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.utils import class_weight
-from imblearn.over_sampling import SMOTE
-import tensorflow as tf
-from collections import Counter
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import f1_score, accuracy_score
+
+from imblearn.over_sampling import SMOTE
+
+from collections import Counter
+
 import joblib
 
 
 lis_macd_lines = []
 
 source_data_file = './ml_data/contract_data.csv'
-filtered_data_file = './ml_data/filtered_data.csv'
-training_data_file = './ml_data/ai_training_data.csv'
-training_sequences = './ml_data/training_sequences.npy'
-training_labels = './ml_data/training_labels.npy'
+filtered_data_file = './base_training_data.csv'
+training_data_file = './ai_training_data.csv'
+training_sequences = './training_sequences.npy'
+training_labels = './training_labels.npy'
 rnn_model_save_path = './models/lstm_model.keras'
 knn_model_save_path = './models/knn_model.pkl'
 
 sequence_length = 10  # Number of rows in each sequence
 
-# input_values = [[21179, 21181, 21202, 21150, 21167, 21169, 21202, 21150, 21169, 21171, 21202, 21150, 52.5, 43.6,
-#                     43.6, -3.3, -4.4, 1.1]]
-
-
-def calculate_ema(prices, period, weighting_factor=0.2):
-    ema = np.zeros(len(prices))                                                                                         # Initialize an array of zeros to store the EMA values
-    sma = np.mean(prices[:period])                                                                                      # Calculate the Simple Moving Average (SMA) for the first 'period' elements
-    ema[period - 1] = sma                                                                                               # Set the initial EMA value at the end of the SMA period
-    for i in range(period, len(prices)):                                                                                # Calculate the EMA for the remaining prices
-        ema[i] = (prices[i] * weighting_factor) + (ema[i - 1] * (1 - weighting_factor))                                 # Apply the EMA formula: (current price * weighting factor) + (previous EMA * (1 - weighting factor))
-    return round(ema[-1], 1)
-
-
-# This function calculates the MACD values
-def calculate_macd_values(closing_prices):
-    global lis_macd_lines                                                                                               # A list that contains maximal 9 calculated macd-lines
-    # Calculate the long-term EMA (26-period) and short-term EMA (12-period)
-    ema_12 = calculate_ema(closing_prices[-12:], 12)
-    ema_26 = calculate_ema(closing_prices, 26)
-    flo_macd_line = round(ema_12 - ema_26, 1)                                                               # Calculate the macd-line
-    lis_macd_lines.append(flo_macd_line)                                                                      # Add the macd-line to the list
-
-    if len(lis_macd_lines) > 9:                                                                                         # Keep only the last 9 values for the 9-period EMA calculation
-        lis_macd_lines = lis_macd_lines[-9:]
-        flo_signal_line = round(calculate_ema(lis_macd_lines, 9), 1)                                    # Calculate the signal line
-        flo_histogram = round(flo_macd_line - flo_signal_line, 1)                         # Calculate the histogram as the difference between MACD line and signal line
-        return [flo_macd_line, flo_signal_line, flo_histogram]
-
-    return [flo_macd_line, 0.0, 0.0]
-
-
-
-def fetch_and_clean_data_rows():
-
-    filtered_rows = []
-
-    columns_to_keep = [
-        'Current candle open', 'Current candle close', 'Current candle high', 'Current candle low',
-        'Previous candle open', 'Previous candle close', 'Previous candle high', 'Previous candle low',
-        'Oldest candle open', 'Oldest candle close', 'Oldest candle high', 'Oldest candle low',
-        'Current candle netchange', 'Previous candle netchange', 'Oldest candle netchange',
-        'avg_change', 'percentageChange', 'spread', 'std dev',
-        'MACD line', 'Signal_line', 'Histogram', 'Status', 'Buy/Sell'
-    ]
-
-    valid_values = {2, 1, 0}  # Valid values for 'B/S' column
-
-
-    if not os.path.isfile(source_data_file):
-        print(f"Source data file not found: {source_data_file}")
-        return
-
-    if os.path.isfile(filtered_data_file):
-        # Delete the old training data file
-        os.remove(filtered_data_file)
-        print(f"Deleted old training data: {filtered_data_file}")
-
-    # Read rows from the existing source CSV
-    with open(source_data_file, mode='r') as source_file:
-        reader = csv.reader(source_file)
-        headers = next(reader)  # Read the headers
-        # Map header indices
-        header_indices = {header: idx for idx, header in enumerate(headers)}
-        # Find indices of columns to keep
-        indices_to_keep = [header_indices[col] for col in columns_to_keep if col in header_indices]
-        # Index of 'B/S' column
-        bs_index = header_indices['Buy/Sell']
-        # Filter the rows
-        for row in reader:
-            if row:  # Skip empty rows
-                if row[bs_index] in valid_values and "N/A" not in [row[idx] for idx in indices_to_keep]:
-                    filtered_row = [row[idx] for idx in indices_to_keep]
-                    filtered_rows.append(filtered_row)
-
-    # If needed, write filtered data back to a new CSV
-    with open(filtered_data_file, mode='w', newline='') as output_file:
-        writer = csv.writer(output_file)
-        # Write headers
-        writer.writerow([headers[idx] for idx in indices_to_keep])
-        # Write filtered rows
-        writer.writerows(filtered_rows)
+# def fetch_and_clean_data_rows():
+#
+#     filtered_rows = []
+#
+#     columns_to_keep = [
+#         'Current candle open', 'Current candle close', 'Current candle high', 'Current candle low',
+#         'Previous candle open', 'Previous candle close', 'Previous candle high', 'Previous candle low',
+#         'Oldest candle open', 'Oldest candle close', 'Oldest candle high', 'Oldest candle low',
+#         'Current candle netchange', 'Previous candle netchange', 'Oldest candle netchange',
+#         'avg_change', 'percentageChange', 'spread', 'std dev',
+#         'MACD line', 'Signal_line', 'Histogram', 'Status', 'Buy/Sell'
+#     ]
+#
+#     valid_values = {2, 1, 0}  # Valid values for 'B/S' column
+#
+#
+#     if not os.path.isfile(source_data_file):
+#         print(f"Source data file not found: {source_data_file}")
+#         return
+#
+#     if os.path.isfile(filtered_data_file):
+#         # Delete the old training data file
+#         os.remove(filtered_data_file)
+#         print(f"Deleted old training data: {filtered_data_file}")
+#
+#     # Read rows from the existing source CSV
+#     with open(source_data_file, mode='r') as source_file:
+#         reader = csv.reader(source_file)
+#         headers = next(reader)  # Read the headers
+#         # Map header indices
+#         header_indices = {header: idx for idx, header in enumerate(headers)}
+#         # Find indices of columns to keep
+#         indices_to_keep = [header_indices[col] for col in columns_to_keep if col in header_indices]
+#         # Index of 'B/S' column
+#         bs_index = header_indices['Buy/Sell']
+#         # Filter the rows
+#         for row in reader:
+#             if row:  # Skip empty rows
+#                 if row[bs_index] in valid_values and "N/A" not in [row[idx] for idx in indices_to_keep]:
+#                     filtered_row = [row[idx] for idx in indices_to_keep]
+#                     filtered_rows.append(filtered_row)
+#
+#     # If needed, write filtered data back to a new CSV
+#     with open(filtered_data_file, mode='w', newline='') as output_file:
+#         writer = csv.writer(output_file)
+#         # Write headers
+#         writer.writerow([headers[idx] for idx in indices_to_keep])
+#         # Write filtered rows
+#         writer.writerows(filtered_rows)
 
 
 
 def prepare_ai_training_data():
 
     # Mapping for 'B/S' values
-    bs_mapping = {'BUY': 1, 'HOLD': 0, 'SELL': 2}
+    bs_mapping = {'BUY': 0, 'SELL': 1}
 
     if os.path.isfile(training_data_file):
         # Delete the old training data file
@@ -130,33 +104,25 @@ def prepare_ai_training_data():
         return
 
     # Open the newly created datafile
-    with open(filtered_data_file, mode='r') as source_file:
+    with open(filtered_data_file, mode="r", newline="") as source_file:
         reader = csv.reader(source_file)
-        # get the current headers from the CSV
-        headers = next(reader)
-        rows = list(reader)  # Read all rows
-        # Add new headers for MACD values
-        trimmed_headers = headers[:15]
-        trimmed_headers.extend(['MACD Line', 'Signal Line', 'Histogram', 'B/S'])
-        training_rows = []  # For storing the final rows with MACD data
-        hold_counter = 0
-        for i in range(len(rows)):
-            bs_value = bs_mapping.get(rows[i][15])  # Get 'B/S' value and map it
+        headers = next(reader)  # Read the headers
+        rows = list(reader)  # Read all rows into a list
 
-            # # Skip rows with 'HOLD' (mapped to 0)
-            # if bs_value == 0 and hold_counter < 5:
-            #     hold_counter += 1
-            #     continue
-            # else:
-            #     hold_counter = 0
+        # Modify headers to reflect changes
+        trimmed_headers = headers[:8] + ["B/S"]  # Keep first 8 columns and replace column 8
 
-            trimmed_row = rows[i][:15]
-            trimmed_row.append(rows[i][16])
-            trimmed_row.append(rows[i][17])
-            trimmed_row.append(rows[i][18])
-            trimmed_row.append(bs_value)
-            training_rows.append(trimmed_row)
-            # print(trimmed_row)
+        training_rows = []  # Store modified rows
+
+        for row in rows:
+            if len(row) < 11:  # Ensure row has enough columns
+                print(f"⚠️ Skipping incomplete row: {row}")
+                continue
+
+            row[8] = bs_mapping.get(row[8], row[8])  # Replace column index 8 with mapped value
+            row[10] = bs_mapping.get(row[10], row[10])  # Replace column index 10 with mapped value
+
+            training_rows.append(row)  # Append modified row
 
 
         # Write to the new training data file
@@ -271,114 +237,97 @@ def creating_the_sequences():
 
 
 
+# Custom focal loss function (optional)
+def focal_loss(alpha=0.25, gamma=2.0):
+    def loss(y_true, y_pred):
+        y_true = K.cast(y_true, K.floatx())
+        bce = K.binary_crossentropy(y_true, y_pred)
+        p_t = y_true * y_pred + (1 - y_true) * (1 - y_pred)
+        loss = alpha * K.pow((1 - p_t), gamma) * bce
+        return K.mean(loss)
+    return loss
+
+
 def ai_rnn_model_training():
-    # Load the data
+    """Train an RNN model to classify BUY, SELL, HOLD based on MACD and candlestick patterns."""
+
+    # Load preprocessed training data
+    training_sequences = "./training_sequences.npy"
+    training_labels = "./training_labels.npy"
+    rnn_model_save_path = "./models/rnn_model.h5"
+
     sequences = np.load(training_sequences)
     labels = np.load(training_labels)
 
-    # print(f"Loaded sequences shape: {sequences}")
-    # print(f"Loaded labels shape: {labels}")
+    # Check initial shape
+    print(f"Loaded sequences shape: {sequences.shape}")  # (samples, timesteps, features)
+    print(f"Loaded labels shape: {labels.shape}")  # (samples,)
 
+    # Train-test split
     x_train, x_test, y_train, y_test = train_test_split(sequences, labels, test_size=0.2, random_state=42)
 
-    # print(f"Training set: {x_train.shape}, {y_train.shape}")
-    # print(f"Testing set: {x_test.shape}, {y_test.shape}")
+    # Oversampling (SMOTE) to balance classes
+    smote = SMOTE(random_state=42, k_neighbors=1)
+    x_train_flat = x_train.reshape(x_train.shape[0], -1)
+    x_train_balanced, y_train_balanced = smote.fit_resample(x_train_flat, y_train)
 
-    # # Flatten the 3D time-series data to 2D
-    # x_train_flat = x_train.reshape(x_train.shape[0], -1)
-    #
-    # # Apply SMOTE
-    # print("Before SMOTE:", Counter(y_train))
-    #
-    # smote = SMOTE(random_state=42, k_neighbors=1)
-    # x_train_flat = x_train.reshape(x_train.shape[0], -1)
-    # x_train_balanced, y_train_balanced = smote.fit_resample(x_train_flat, y_train)
-    # print("After SMOTE:", Counter(y_train_balanced))
-    #
-    # # Reshape back to original 3D shape
-    # x_train = x_train_balanced.reshape(-1, sequence_length, 18)  # Restore timesteps and features
-    # y_train = y_train_balanced
+    # Reshape back to (samples, timesteps, features)
+    sequence_length = 10  # Modify if needed
+    x_train = x_train_balanced.reshape(-1, sequence_length, 10)
+    y_train = y_train_balanced
 
+    # Convert labels to categorical (for softmax output)
+    y_train = to_categorical(y_train, num_classes=2)
+    y_test = to_categorical(y_test, num_classes=2)
 
-    # Define the model
+    # Define the RNN model
     model = Sequential([
-        LSTM(256, return_sequences=True, input_shape=(sequence_length, 18)),  # Input sequence length = 26
+        LSTM(256, return_sequences=True, input_shape=(sequence_length, 10)),
         Dropout(0.3),
         LSTM(128, return_sequences=False),
         Dropout(0.3),
         Dense(64, activation='relu'),
-        Dense(3, activation='softmax')  # 3 classes: BUY, HOLD, SELL
+        Dense(2, activation='softmax')  # 2 output classes: BUY, SELL
     ])
 
+    # Compile the model with focal loss or sparse categorical crossentropy
+    model.compile(optimizer='adam', loss=focal_loss(alpha=0.25, gamma=2.0), metrics=['accuracy'])
 
-    # Dense(1, activation='tanh')  # Output layer with 1 class for single-class classification
-
-    # model.compile(optimizer='adam',loss=focal_loss(alpha=0.25, gamma=2.0),metrics=['accuracy'])
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    # model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])  # for 1 class classification
-    # model.summary()
-
-
-
-    # class_weights_dict = class_weight.compute_class_weight(
-    #     class_weight='balanced',
-    #     classes=np.unique(y_train),
-    #     y=y_train
-    # )
-
-    # class_weights_dict = tune_class_weights(model)
-
-
-
-    # class_weights_dict = {
-    #     0: 0.5,  # HOLD
-    #     1: 2.2,  # BUY
-    #     2: 1.6   # SELL
-    # }
-
-    # Convert to dictionary for Keras
-    # class_weights_dict = {i: weight for i, weight in enumerate(class_weights_dict)}
-
-
+    # Train the model
     history = model.fit(
-        x_train, y_train, # class_weight=class_weights_dict,
-        epochs=50,  # Adjust based on your experimentation
+        x_train, y_train,
+        epochs=50,
         batch_size=32,
         validation_data=(x_test, y_test),
         verbose=1
     )
 
+    # Evaluate the model
     loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
-    # print(f"Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}")
+    print(f"Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}")
 
+    # Predictions
     predictions = model.predict(x_test)
-    y_pred = np.argmax(predictions, axis=1)  # Use np.round(predictions) for binary classification
+    y_pred = np.argmax(predictions, axis=1)
+    y_test_labels = np.argmax(y_test, axis=1)
 
+    # Print evaluation metrics
+    precision = precision_score(y_test_labels, y_pred, average='weighted', zero_division=0)
+    recall = recall_score(y_test_labels, y_pred, average='weighted')
+    f1 = f1_score(y_test_labels, y_pred, average='weighted')
+    conf_matrix = confusion_matrix(y_test_labels, y_pred)
 
-    # print("bs_mapping = 'BUY': 1, 'HOLD': 0, 'SELL': 2")
-    # print(f"Predictions (first 15): {y_pred[:15]}")
-    # print(f"True labels (first 15): {y_test[:15]}")
+    print("RNN Precision:", precision)
+    print("Recall:", recall)
+    print("F1-Score:", f1)
+    print("Confusion Matrix:\n", conf_matrix)
 
-    precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)  # Weighted for multi-class
-    recall = recall_score(y_test, y_pred, average='weighted')
-    f1 = f1_score(y_test, y_pred, average='weighted')
-
-    # Confusion matrix
-    conf_matrix = confusion_matrix(y_test, y_pred)
-
-    # print("RNN Precision:", precision)
-    # print("Recall:", recall)
-    # print("F1-Score:", f1)
-    # print("Confusion Matrix:\n", conf_matrix)
-
-    # unique, counts = np.unique(labels, return_counts=True)
-    # print(dict(zip(unique, counts)))
-
-    # Save the model (HDF5 format)
-    if not os.path.exists('./models'):
-        os.makedirs('./models')  # Ensure the directory exists
+    # Save model
+    if not os.path.exists("./models"):
+        os.makedirs("./models")
 
     model.save(rnn_model_save_path)
+    print("✅ Model saved successfully!")
 
 def ai_knn_model_training():
     # Load the training data
@@ -475,9 +424,9 @@ def make_a_prediction(input_values,advice):
     # bs_mapping = 'BUY': 1, 'HOLD': 0, 'SELL': 2
     # Map the RNN output to the correct decision based on your bs_mapping
     rnn_output = np.round(rnn_prediction[0][0])  # Round to nearest integer
-    if rnn_output == 1:
+    if rnn_output == 0:
         rnn_decision = "Buy"
-    elif rnn_output == 2:
+    elif rnn_output == 1:
         rnn_decision = "Sell"
 
     # Preprocess the input values for k-NN
@@ -486,9 +435,9 @@ def make_a_prediction(input_values,advice):
 
     # Map the k-NN output to the correct decision based on your bs_mapping
     knn_decision = "Hold"  # Default decision
-    if knn_prediction == 1:
+    if knn_prediction == 0:
         knn_decision = "Buy"
-    elif knn_prediction == 2:
+    elif knn_prediction == 1:
         knn_decision = "Sell"
 
     print(f"Bot suggests: {advice}", f"KNN suggests: {knn_decision}", f"RNN suggests: {rnn_decision}")
@@ -499,12 +448,14 @@ def make_a_prediction(input_values,advice):
 
 
 def start_ai():
-    fetch_and_clean_data_rows()
+    # fetch_and_clean_data_rows()
     prepare_ai_training_data()
     creating_the_sequences()
     ai_rnn_model_training()
-    ai_knn_model_training()
+    # ai_knn_model_training()
 
+if __name__ == "__main__":
+     start_ai()
 
 # Precision: 0.15630070308274743
 # Recall: 0.3953488372093023
