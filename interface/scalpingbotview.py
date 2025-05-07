@@ -4,6 +4,8 @@ from matplotlib.figure import Figure
 from PyQt5.QtWidgets import QMainWindow, QLabel
 from PyQt5.QtCore import Qt, pyqtSignal
 
+from datetime import datetime
+
 from connection import account_details
 import interface.chart
 import interface.conditions
@@ -12,7 +14,7 @@ import interface.progressbar
 
 class ScalpingbotView(QMainWindow):
     update_ui_signal = pyqtSignal(
-        list, float, float, str, float, str, int, str, str, float, int, float, int
+         list, float, float, str, float, str, int, str, float, int, float, int
     )
     def create_shadow_effect(self):
         """Reusable method to create a shadow effect."""
@@ -52,13 +54,13 @@ class ScalpingbotView(QMainWindow):
         top_layout.setContentsMargins(margin_left, 0, margin_right, 0)  # Margins for spacing
 
         # Define label texts
-        label_texts = ["Start date/time:", "Last update:", "Candle #:", "Market status:", "Current P&L:", "Day profit:", "Balance:"]
+        label_texts = ["Start:", "Last update:", "Candle #:", "Current P&L:", "Day profit:", "Balance:"]
 
         # Get the available width (total width minus margins)
         available_width = self.top_bar.width() - 100  # Subtract left & right margins (50px each)
 
         # Define a fixed label width (you can adjust this)
-        label_width = 190
+        label_width = 230
         num_labels = len(label_texts)
 
         # Calculate dynamic spacing
@@ -91,10 +93,10 @@ class ScalpingbotView(QMainWindow):
         self.chart_area.setGraphicsEffect(self.create_shadow_effect())
 
 
-        # MACD Placeholder
-        self.macd_area = interface.macd.MACDArea(self)
-        self.macd_area.move(margin_left, 800)  # (x, y) position relative to the window
-        self.macd_area.setGraphicsEffect(self.create_shadow_effect())
+        # # MACD Placeholder
+        # self.macd_area = interface.macd.MACDArea(self)
+        # self.macd_area.move(margin_left, 800)  # (x, y) position relative to the window
+        # self.macd_area.setGraphicsEffect(self.create_shadow_effect())
 
 
         # Progress bar placeholder
@@ -190,26 +192,17 @@ class ScalpingbotView(QMainWindow):
             row_layout.addWidget(value)
             market_layout.addLayout(row_layout)
 
-    def update_ui(self, candles: list, macd: float, signal: float, advice: str,
-                  start_balance: float, start_datetime: str, int_number_of_candles: int,
-                  market_condition: str, direction: str, flo_contract_size: float,
-                  int_stop_loss_distance: int, int_this_contract_profit: float, int_positive_counter: int):
-        # print(candles)
-        # print(macd)
-        # print(signal)
-        # print(advice)
-        # print(start_balance)
-        # print(start_datetime)
-        # print(int_number_of_candles)
-        # print(market_condition)
-        # print(direction)
-        # print(flo_contract_size)
-        print(int_stop_loss_distance)
-        # print(int_this_contract_profit)
-        # print(int_positive_counter)
+    def update_ui(self, candles, macd, signal, advice, start_balance, start_datetime,
+                  int_number_of_candles, market_condition, flo_contract_size,
+                  int_stop_loss_distance, int_this_contract_profit, int_positive_counter):
 
-        from datetime import datetime
         current_time = datetime.now().strftime("%H:%M:%S")
+
+        # print(candles, macd, signal, advice, start_balance, start_datetime,
+        # int_number_of_candles, market_condition, flo_contract_size,
+        # int_stop_loss_distance, int_this_contract_profit, int_positive_counter)
+
+
         account_information = account_details()
         flo_current_balance = round(account_information['accounts'][0]['balance']['balance'], 2)
         total_profit = round(flo_current_balance - start_balance, 2)
@@ -218,13 +211,12 @@ class ScalpingbotView(QMainWindow):
         value_color = "#D4AF37"
 
         self.label_map = {
-            "Start date/time:": self.labels[0],
+            "Start:": self.labels[0],
             "Last update:": self.labels[1],
             "Candle #:": self.labels[2],
-            "Market status:": self.labels[3],
-            "Current P&L:": self.labels[4],
-            "Day profit:": self.labels[5],
-            "Balance:": self.labels[6]
+            "Current P&L:": self.labels[3],
+            "Day profit:": self.labels[4],
+            "Balance:": self.labels[5]
         }
 
         # Enable rich text formatting for QLabel
@@ -239,18 +231,17 @@ class ScalpingbotView(QMainWindow):
             )
 
         # Updating values
-        update_label("Start date/time:", start_datetime)
+        update_label("Start:", start_datetime)
         update_label("Last update:", current_time)
         update_label("Candle #:", f"{int_number_of_candles}")
-        update_label("Market status:", market_condition)
         update_label("Current P&L:", f"€{str(int_this_contract_profit)}")
         update_label("Day profit:", f"€{str(total_profit)}")
-        update_label("Balance:", f"€{start_balance}")
+        update_label("Balance:", f"€{flo_current_balance}")
 
         self.chart_area.update_candles(candles)
-        self.macd_area.update_macd([start_datetime, macd, signal])
+        self.chart_area.update_macd([candles[-1][2], macd, signal])
         self.progressbar.update_bar(int_positive_counter)
-        self.current_contract_value.setText(direction)
+        self.current_contract_value.setText(advice)
         self.contract_size_value.setText(str(flo_contract_size))
         self.stop_loss_value.setText(str(int_stop_loss_distance))
         self.current_candle_value.setText(str(candles[0][0]))
@@ -260,7 +251,7 @@ class ScalpingbotView(QMainWindow):
             self.oldest_candle_value.setText(str(candles[2][0]))
         self.macd_value.setText(str(macd))
         self.signal_value.setText(str(signal))
-        self.conditions_area.update_conditions(candles, macd, signal, advice)
+        self.conditions_area.update_conditions(candles, macd, signal, advice, market_condition)
 
 
         self.update()

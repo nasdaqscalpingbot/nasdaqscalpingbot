@@ -1,12 +1,10 @@
-import sys
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, \
-    QWidget, QGraphicsDropShadowEffect
 from PyQt5.QtGui import QColor, QLinearGradient
-from matplotlib.figure import Figure
 import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 from PyQt5.QtGui import QPainter, QPen
 from PyQt5.QtCore import Qt
+
+
 
 class MACDArea(QLabel):
     def __init__(self, parent=None):
@@ -14,10 +12,8 @@ class MACDArea(QLabel):
         self.setStyleSheet("background-color: #1E1E1E; border: 3px solid black;")
         self.setFixedSize(980, 200)
 
-        self.candle_data = [["00:00:01", 0.1, 0.1],]
-        self.start_time = self.candle_data[0][0]
-
-        self.candle_data.reverse()  # Reverse to make the oldest first
+        self.candle_data = [['2025-03-06T00:38:41.625', 0.1, 0.1],]
+        self.start_time = datetime.datetime.fromisoformat(self.candle_data[0][0])
 
         # Determine Y-axis scale from the candle data
         self.macd_line_max = max(candle[1] for candle in self.candle_data)  # Highest MACD-line
@@ -77,16 +73,17 @@ class MACDArea(QLabel):
         painter.drawLine(0, y_center, self.width(), y_center)
 
         # X-axis (time)
-        current_time = datetime.datetime.strptime(self.start_time, "%H:%M:%S")  # ✅ Convert to datetime
-        for index, x in enumerate(range(10, self.width(), self.grid_spacing_x)):
+        self.start_time = datetime.datetime.fromisoformat(self.candle_data[0][0])
+        # print(self.start_time)
+        for index, x in enumerate(range(self.rect().width() - self.grid_spacing_x - 15, 0, -self.grid_spacing_x)):
             painter.drawLine(x, 0, x, self.height())  # Vertical line
 
-            # Only draw time labels for every other line
-            if index % 2 == 0:
-                time_label = current_time.strftime("%H:%M")  # ✅ Convert back to string
-                painter.drawText(x + 5, self.height() - 5, time_label)  # Label slightly above the bottom
-
-            current_time += datetime.timedelta(minutes=5)  # ✅ Now this works!
+            # # Only draw time labels for every other line
+            # if index % 2 == 0:
+            #     time_label = self.start_time.strftime("%H:%M")
+            #     painter.drawText(x + 5, self.height() - 5, time_label)  # Label slightly above the bottom
+            #
+            # self.start_time -= datetime.timedelta(minutes=5)  # Subtract 5 minutes for the next label
 
     def draw_macd_values(self, painter: object) -> object:
         step_x = self.grid_spacing_x  # Horizontal spacing
@@ -165,40 +162,24 @@ class MACDArea(QLabel):
             painter.drawLine(signal_points[j - 1][0], signal_points[j - 1][1], signal_points[j][0], signal_points[j][1])
 
     def update_macd(self, new_macd_values):
-        if len(new_macd_values) == 3:
-            self.candle_data.append(new_macd_values)  # Add to the list
+        self.candle_data.append(new_macd_values)  # Add to the list
+        #print(self.candle_data)
+        # Ignore first 32 candles (MACD isn't valid before this)
+        if len(self.candle_data) < 35:
+            return  # Wait until enough data is collected
 
-            # Ignore first 32 candles (MACD isn't valid before this)
-            if len(self.candle_data) < 35:
-                return  # Wait until enough data is collected
+        # Ensure we keep only the last 30 MACD values **after** we have at least 32
+        self.candle_data = self.candle_data[-35:]
 
-            # Ensure we keep only the last 30 MACD values **after** we have at least 32
-            self.candle_data = self.candle_data[-30:]
+        # Determine Y-axis scale from valid MACD data
+        self.macd_line_max = max(candle[1] for candle in self.candle_data)
+        self.macd_line_min = min(candle[1] for candle in self.candle_data)
+        self.signal_line_max = max(candle[2] for candle in self.candle_data)
+        self.signal_line_min = min(candle[2] for candle in self.candle_data)
 
-            # Extract valid MACD and signal values
-            valid_macd_values = self.candle_data  # Now we know it has 30 valid entries
+        # Set Y-axis range using the widest values
+        self.y_axis_min = min(candle[2] for candle in self.candle_data) - 10
+        self.y_axis_max = max(candle[1] for candle in self.candle_data) + 10
 
-            # Determine Y-axis scale from valid MACD data
-            self.macd_line_max = max(candle[1] for candle in valid_macd_values)
-            self.macd_line_min = min(candle[1] for candle in valid_macd_values)
-            self.signal_line_max = max(candle[2] for candle in valid_macd_values)
-            self.signal_line_min = min(candle[2] for candle in valid_macd_values)
-
-            # Calculate histogram dynamically
-            self.histogram_max = max(candle[1] - candle[2] for candle in valid_macd_values)
-            self.histogram_min = min(candle[1] - candle[2] for candle in valid_macd_values)
-
-            # Determine the start time from the first valid MACD candle
-            self.start_time = valid_macd_values[0][0]
-
-            latest_candle = self.candle_data[-1]  # Get the most recent MACD candle
-            latest_macd = latest_candle[1]
-            latest_signal = latest_candle[2]
-            latest_histogram = latest_macd - latest_signal  # Calculate histogram last
-
-            # Set Y-axis range using the widest values
-            self.y_axis_min = min(candle[4] for candle in valid_macd_values) - 10
-            self.y_axis_max = max(candle[3] for candle in valid_macd_values) + 10
-
-            # Determine horizontal grid spacing
-            self.grid_spacing_x = int(self.width() / 35)  # 35 divisions
+        # Determine horizontal grid spacing
+        self.grid_spacing_x = int(self.width() / 34)  # 35 divisions

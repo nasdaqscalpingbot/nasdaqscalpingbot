@@ -3,17 +3,19 @@ import json
 from datetime import datetime, time
 import time as sleep_time
 from ai_logging import update_errorlog
-
-
-USERNAME = "***************************"
-PASSWORD = "***************************"
-
+from dotenv import load_dotenv
+import os
 
 # ========== Globals =======
+load_dotenv()
+USERNAME = os.getenv("USER")
+PASSWORD = os.getenv("PASSWORD")
+API_KEY = os.getenv("API_KEY")
+
 BASE_URL = "api-capital.backend-capital.com"  # Replace with the actual API endpoint
 DEMO_BASE_URL = "demo-api-capital.backend-capital.com"  # Replace with the actual API endpoint
 EXTENDED_URL = "/api/v1/"
-API_KEY = "*************************"  # Replace with your actual API key
+
 CST_TOKEN = ""
 X_SECURITY_TOKEN = ""
 

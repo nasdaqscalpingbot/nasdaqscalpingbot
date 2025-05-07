@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8d0dcca0-4374-40c6-bb53-6d35a8682641" name="Changes" comment="Version 2.2.1 with new GUI and 'new' strategy">
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ai.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/hyperparameter_results_rnn.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/interface/chart_current.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml_data/contracts_ai_data.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml_data/contracts_data.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml_data/old_ai.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/AI-Training_data_generator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/ai-tester_rnn.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/ai-tester_xg_boost.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/balanced_training_data.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/hyperparameter_results.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai-models/knn_model.pkl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai-models/lstm_model.keras" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ai_logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_logging.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connection.py" beforeDir="false" afterPath="$PROJECT_DIR$/connection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts.py" beforeDir="false" afterPath="$PROJECT_DIR$/contracts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/error_log.csv" beforeDir="false" afterPath="$PROJECT_DIR$/error_log.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interface/chart.py" beforeDir="false" afterPath="$PROJECT_DIR$/interface/chart.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interface/conditions.py" beforeDir="false" afterPath="$PROJECT_DIR$/interface/conditions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interface/macd.py" beforeDir="false" afterPath="$PROJECT_DIR$/interface/macd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interface/scalpingbotview.py" beforeDir="false" afterPath="$PROJECT_DIR$/interface/scalpingbotview.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/market.py" beforeDir="false" afterPath="$PROJECT_DIR$/market.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/market_conditions.csv" beforeDir="false" afterPath="$PROJECT_DIR$/market_conditions.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml_data/ai.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml_data/ai_training_data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ml_data/ai_training_data.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml_data/base_training_data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ml_data/base_training_data.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml_data/models/rnn_model.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml_data/training_labels.npy" beforeDir="false" afterPath="$PROJECT_DIR$/ml_data/training_labels.npy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml_data/training_sequences.npy" beforeDir="false" afterPath="$PROJECT_DIR$/ml_data/training_sequences.npy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/backtest_testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/ml_data/backtest_testing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/error_log.csv" beforeDir="false" afterPath="$PROJECT_DIR$/other/error_log.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/nasdaq_backtest.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/training_data.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statuscheck.py" beforeDir="false" afterPath="$PROJECT_DIR$/statuscheck.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/strategy.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2qLY28uyvjNmTumsmVfUIkNnMiK" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Python.AI-Training_data_generator.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ai-tester.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ai.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ai_logging.executor&quot;: &quot;Run&quot;,
+    &quot;Python.backtest_testing.executor&quot;: &quot;Run&quot;,
+    &quot;Python.chart.executor&quot;: &quot;Run&quot;,
+    &quot;Python.conditions.executor&quot;: &quot;Run&quot;,
+    &quot;Python.connection.executor&quot;: &quot;Run&quot;,
+    &quot;Python.contracts.executor&quot;: &quot;Run&quot;,
+    &quot;Python.macd.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main-gui.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_gui.executor&quot;: &quot;Run&quot;,
+    &quot;Python.market.executor&quot;: &quot;Run&quot;,
+    &quot;Python.musicgen_basic.executor&quot;: &quot;Run&quot;,
+    &quot;Python.old_ai.executor&quot;: &quot;Run&quot;,
+    &quot;Python.scalpingbotview.executor&quot;: &quot;Run&quot;,
+    &quot;Python.strategy.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/github/nasdaqscalpingbot/ml_data&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\github\nasdaqscalpingbot\ml_data" />
+      <recent name="E:\github\nasdaqscalpingbot\interface" />
+      <recent name="E:\github\nasdaqscalpingbot\other" />
+      <recent name="E:\github\nasdaqscalpingbot\data" />
+      <recent name="E:\github\nasdaqscalpingbot" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\github\nasdaqscalpingbot\ml_data" />
+      <recent name="E:\github\nasdaqscalpingbot\other" />
+      <recent name="E:\github\nasdaqscalpingbot" />
+      <recent name="E:\github\nasdaqscalpingbot\interface" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-babbdf50b680-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.15989.155" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8d0dcca0-4374-40c6-bb53-6d35a8682641" name="Changes" comment="" />
+      <created>1734443112653</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1734443112653</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Version 2.2.0 with new market detection system and a new file structure">
+      <option name="closed" value="true" />
+      <created>1740526821418</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1740526821418</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Version 2.2.1 with new GUI and 'new' strategy">
+      <option name="closed" value="true" />
+      <created>1741562630950</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1741562630950</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Version 2.2.1 with new GUI and 'new' strategy">
+      <option name="closed" value="true" />
+      <created>1741562648468</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1741562648468</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Version 2.2.0 with new market detection system and a new file structure" />
+    <MESSAGE value="Version 2.2.1 with new GUI and 'new' strategy" />
+    <option name="LAST_COMMIT_MESSAGE" value="Version 2.2.1 with new GUI and 'new' strategy" />
+  </component>
+</project>

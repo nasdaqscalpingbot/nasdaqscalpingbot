@@ -34,6 +34,7 @@ class ConditionsArea(QLabel):
 
         # Condition list (initialized as False)
         self.conditions = {
+            "Market is normal": False,
             "Current > previous": False,
             "Previous > oldest": False,
             "MACD > Signal": False,
@@ -83,7 +84,7 @@ class ConditionsArea(QLabel):
             self.result_labels[condition] = label_result
             row_index += 1  # Move to the next row
 
-    def update_conditions(self, lst_fetched_candles, macd, signal, advice):
+    def update_conditions(self, lst_fetched_candles, macd, signal, advice, market_condition):
         """Update the advice and condition results dynamically."""
         if not lst_fetched_candles or len(lst_fetched_candles) < 3:
             return
@@ -97,6 +98,9 @@ class ConditionsArea(QLabel):
         oldest_candle_open = lst_fetched_candles[2][0]
 
         # Condition Checks
+        if market_condition == "NORMAL":
+            self.conditions["Market is normal"] = True
+
         if current_candle_open > (previous_candle_open + 5):
             self.conditions["Current > previous"] = True
 
@@ -106,6 +110,9 @@ class ConditionsArea(QLabel):
         if macd > (signal + 2):
             self.conditions["MACD > Signal"] = True
 
+        if self.conditions["Current > previous"] and self.conditions["Previous > oldest"] and self.conditions["MACD > Signal"] and self.conditions["Market is normal"]:
+            self.conditions["BUY Candle Check"] = True
+
         if current_candle_open < (previous_candle_open - 5):
             self.conditions["Current < previous"] = True
 
@@ -114,6 +121,9 @@ class ConditionsArea(QLabel):
 
         if signal > (macd + 2):
             self.conditions["Signal > MACD"] = True
+
+        if self.conditions["Current < previous"] and self.conditions["Previous < oldest"] and self.conditions["Signal > MACD"] and self.conditions["Market is normal"]:
+            self.conditions["SELL Candle Check"] = True
 
         # Update Advice Label
         self.advice_label.setText(f"Current Advice: {advice}")

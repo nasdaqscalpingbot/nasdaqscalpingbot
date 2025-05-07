@@ -2,8 +2,6 @@
 import json
 import connection
 
-
-
 # This function calculate the contract details
 def calculate_position_sizes(flo_pre_contract_balance):
     flo_basic_contract_size = round((flo_pre_contract_balance - 300) / 1000, 1)                     # Contract size
@@ -26,30 +24,29 @@ def calculate_trailing_stop_loss(lst_fetched_candles: list[list[float]], multipl
     # Scale the stop-loss and ensure it's above the minimum
     stop_loss_distance = round(avg_diff * multiplier, 0)
     # int_stop_loss_distance = max(stop_loss_distance, min_stop_loss)
-    int_stop_loss_distance = 10
-    print("stop loss distance", int_stop_loss_distance)
+    int_stop_loss_distance = 28
 
     return int_stop_loss_distance
 
 
 # This function handle the sequence of setting up a new contract
-def open_new_contract(lst_fetched_candles, direction):
-    account_information = connection.account_details()  # Get the current account details/balance
-    flo_pre_contract_balance = account_information['accounts'][0]['balance']['balance']  # Store the current account balance
-    flo_contract_size = calculate_position_sizes(flo_pre_contract_balance)                                                                      # Starts with calculating the contract values
-    int_stop_loss_distance = calculate_trailing_stop_loss(lst_fetched_candles)
-    connection.active_account()                                                                                                    # Activate the active account
-    payload = json.dumps({                                                                                              # Prepare the position request
-        "epic": "US100",                                                                                                # Set the market
-        "direction": direction,                                                                        # Set the direction buy or sell
-        "size": flo_contract_size,                                                                      # Set the contracts size
-        "level": 20,                                                                                                    # Set the level to 20, required, don't know what is does
-        "type": "LIMIT",                                                                                                # Make it a limit order
-        # "stopAmount": S_SESSION.int_contract_stop_loss,                                                                 # Set the stop-loss amount
-        # "profitAmount": S_SESSION.int_contract_take_profit                                                              # Set the take profit amount
-        "stopDistance": int_stop_loss_distance,
-        # "profitDistance": 30,
-        "trailingStop": True
-    })
-    connection.create_position(payload)                                                                                            # Create the actual contract (connection.py)
-    return direction, flo_contract_size, int_stop_loss_distance
+def open_new_contract(lst_fetched_candles, advice):
+        account_information = connection.account_details()  # Get the current account details/balance
+        flo_pre_contract_balance = account_information['accounts'][0]['balance']['balance']  # Store the current account balance
+        flo_contract_size = calculate_position_sizes(flo_pre_contract_balance)                                                                      # Starts with calculating the contract values
+        int_stop_loss_distance = calculate_trailing_stop_loss(lst_fetched_candles)
+        connection.active_account()                                                                                                    # Activate the active account
+        payload = json.dumps({                                                                                              # Prepare the position request
+            "epic": "US100",                                                                                                # Set the market
+            "direction": advice,                                                                        # Set the direction buy or sell
+            "size": flo_contract_size,                                                                      # Set the contracts size
+            "level": 20,                                                                                                    # Set the level to 20, required, don't know what is does
+            "type": "LIMIT",                                                                                                # Make it a limit order
+            # "stopAmount": S_SESSION.int_contract_stop_loss,                                                                 # Set the stop-loss amount
+            # "profitAmount": S_SESSION.int_contract_take_profit                                                              # Set the take profit amount
+            "stopDistance": int_stop_loss_distance,
+            # "profitDistance": 30,
+            "trailingStop": True
+        })
+        connection.create_position(payload)                                                                                            # Create the actual contract (connection.py)
+        return flo_contract_size, int_stop_loss_distance

@@ -1,8 +1,10 @@
 import numpy as np
+import pandas as pd
 import connection
 import csv
 import os
 import time
+from datetime import datetime, timedelta
 
 # Define CSV file path
 csv_filename = "./market_conditions.csv"
@@ -27,7 +29,8 @@ def fetch_current_market_info():
 
 
 def fetch_new_candle():
-    current_candle_bids = []  # List to store 3 bid prices
+    global timestamp
+    current_candle_bids = []  # List to store 5 bid prices
 
     for _ in range(5):  # Collect data every minute for 5 minutes
         bid_price, timestamp = fetch_current_market_info()
@@ -36,7 +39,7 @@ def fetch_new_candle():
 
     # Calculate candle values
     open_price = current_candle_bids[0]
-    close_price = sum(current_candle_bids) / 3  # Average bid as close
+    close_price = sum(current_candle_bids) / 5 # Average bid as close
     high_price = max(current_candle_bids)
     low_price = min(current_candle_bids)
 
@@ -68,14 +71,6 @@ def detect_market_condition(lis_fetched_candles):
     else:
         market_status = "SLOW"
 
-    # Get current timestamp
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # Append to CSV
-    with open(csv_filename, mode="a", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow([timestamp, market_status, round(volatility, 4), fast_changes])
-
     return market_status
 
 
@@ -91,18 +86,19 @@ def calculate_ema(prices, period):
 
 
 # This function calculates the MACD values
-def calculate_macd_values(lis_fetched_candles):
-    global lis_macd_lines
-    flo_signal_line = 0.0
-    # Calculate the long-term EMA (26-period)
-    arr_prices = [candle[1] for candle in lis_fetched_candles[:26]]  # Get the latest 26 candles from the beginning of the list
-    ema_12 = calculate_ema(arr_prices[:12], 12)  # Calculate the ema 12 with latest 12 candles
-    ema_26 = calculate_ema(arr_prices, 26)  # Calculate the ema 26 with all 26 candles
-    flo_macd_line = round((ema_12 - ema_26), 2)  # Calculate the macd-line
-    lis_macd_lines.append(flo_macd_line)  # Add the macd-line to the list
+def calculate_macd_values(lst_fetched_candles):
+    df = pd.DataFrame(lst_fetched_candles, columns=['Open', 'Close', 'Timestamp', 'High', 'Low'])
 
-    if len(lis_macd_lines) > 9:  # Keep only the last 9 values for the 9-period EMA calculation
-        lis_macd_lines = lis_macd_lines[-9:]
-        flo_signal_line = round(calculate_ema(lis_macd_lines, 9), 2)  # Calculate the signal line
-        return(flo_macd_line, flo_signal_line)
-    return (flo_macd_line, flo_signal_line, lis_macd_lines)
+    # Bereken de EMA’s zoals in calculate_indicators()
+    df['EMA_12'] = df['Close'].ewm(span=12, adjust=False).mean()
+    df['EMA_26'] = df['Close'].ewm(span=26, adjust=False).mean()
+
+    # Bereken MACD en Signaallijn
+    df['MACD'] = df['EMA_12'] - df['EMA_26']
+    df['Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
+
+    # Haal de meest recente waarden op
+    macd_value = round(df.iloc[-1]['MACD'], 2)
+    signal_value = round(df.iloc[-1]['Signal'], 2)
+
+    return macd_value, signal_value
